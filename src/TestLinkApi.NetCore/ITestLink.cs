@@ -75,6 +75,9 @@ namespace TestLinkApi
         [XmlRpcMethod("tl.getTestCaseByExternalId", StructParams = true)]
         object getTestCaseByExternalId(string devKey, int testcaseexternalid, int testprojectid);
 
+        [XmlRpcMethod("tl.getTestCaseByExternalId", StructParams = true)]
+        object updateTestCase(string devKey, string testcaseexternalid, string name, string summary, string importance, string status);
+
         /// <summary>
         /// get test case specification using external or internal id. returns last version
         /// </summary>

@@ -484,6 +484,29 @@ namespace TestLinkApi
             }
         }
 
+        public bool UpdateTestCase(TestCase pTestCase)
+        {
+            stateIsValid();
+            try
+            {
+                var response = proxy.updateTestCase(devkey, pTestCase.externalid, pTestCase.name, pTestCase.summary, pTestCase.importance.ToString(),  pTestCase.status.ToString());
+                var errs = decodeErrors(response);
+                if (errs.Count > 0 && errs[0].code == 5030) // 5030 is no id found
+                {
+                    return false;
+                }
+
+                handleErrorMessage(response);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            return false;
+        }
+
         public string GetCustomFileds(int testcaseid, string testcaseexternalid, int version, int testprojectid, string customfieldname, string details = "FULL")
         {
             var result = proxy.getTestCaseCustomFieldDesignValue(devkey, testcaseid, testcaseexternalid, version, testprojectid, customfieldname, details);
