@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace TestLinkApi
+namespace XTestlinkApi
 {
     /// <summary>
     /// summary results for the execution of a testplan.

@@ -1,4 +1,4 @@
-﻿namespace TestLinkApi
+﻿namespace XTestlinkApi
 {
     /// <summary>
     /// view of test case identifiers returned by the api call GetTestCaseIdByName

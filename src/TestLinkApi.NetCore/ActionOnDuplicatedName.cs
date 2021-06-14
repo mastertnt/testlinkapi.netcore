@@ -1,4 +1,4 @@
-﻿namespace TestLinkApi
+﻿namespace XTestlinkApi
 {
     /// <summary>
     /// used for creating test cases to tell Testlink what to do 

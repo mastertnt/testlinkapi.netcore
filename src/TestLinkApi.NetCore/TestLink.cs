@@ -5,7 +5,7 @@ using System.IO;
 using System.Net;
 using CookComputing.XmlRpc;
 
-namespace TestLinkApi
+namespace XTestlinkApi
 {
     /// <summary>
     /// this is the proxy class to connect to TestLink.
@@ -57,17 +57,17 @@ namespace TestLinkApi
         /// <param name="log">enable capture of lastRequest and lastResponse for debugging</param>
         public TestLink(string apiKey, string url, bool log)
         {
-            devkey = apiKey;
-            proxy = XmlRpcProxyGen.Create<ITestLink>();
+            this.devkey = apiKey;
+            this.proxy = XmlRpcProxyGen.Create<ITestLink>();
             ServicePointManager.ServerCertificateValidationCallback += (o, c, ch, er) => true;
             if (log)
             {
-                proxy.RequestEvent += myHandler;
-                proxy.ResponseEvent += proxy_ResponseEvent;
+                this.proxy.RequestEvent += this.myHandler;
+                this.proxy.ResponseEvent += this.proxy_ResponseEvent;
             }
 
             if (!string.IsNullOrEmpty(url))
-                proxy.Url = url;
+                this.proxy.Url = url;
         }
 
         #endregion
@@ -88,7 +88,7 @@ namespace TestLinkApi
         {
             args.ResponseStream.Seek(0, SeekOrigin.Begin);
             var sr = new StreamReader(args.ResponseStream);
-            LastResponse = sr.ReadToEnd();
+            this.LastResponse = sr.ReadToEnd();
         }
 
         private void myHandler(object sender, XmlRpcRequestEventArgs args)
@@ -96,7 +96,7 @@ namespace TestLinkApi
             var l = args.RequestStream.Length;
             args.RequestStream.Seek(0, SeekOrigin.Begin);
             var sr = new StreamReader(args.RequestStream);
-            LastRequest = sr.ReadToEnd();
+            this.LastRequest = sr.ReadToEnd();
         }
 
         #endregion
@@ -113,7 +113,7 @@ namespace TestLinkApi
         private bool handleErrorMessage(object errorMessage)
         {
             if (errorMessage is object[])
-                return handleErrorMessage(errorMessage as object[], new int[0]);
+                return this.handleErrorMessage(errorMessage as object[], new int[0]);
             return false;
         }
 
@@ -128,7 +128,7 @@ namespace TestLinkApi
         private bool handleErrorMessage(object errorMessage, params int[] exceptedErrorCodes)
         {
             if (errorMessage is object[])
-                return handleErrorMessage(errorMessage as object[], exceptedErrorCodes);
+                return this.handleErrorMessage(errorMessage as object[], exceptedErrorCodes);
             return false;
         }
 
@@ -142,7 +142,7 @@ namespace TestLinkApi
         /// <param name="exceptedErrorCodes">a list of integers that should not result in an exception to be processed</param>
         private bool handleErrorMessage(object[] errorMessage, int[] exceptedErrorCodes)
         {
-            var errs = decodeErrors(errorMessage);
+            var errs = this.decodeErrors(errorMessage);
             if (errs.Count > 0)
             {
                 foreach (var foundError in errs)
@@ -170,7 +170,7 @@ namespace TestLinkApi
 
         private List<TestLinkErrorMessage> decodeErrors(object messageList)
         {
-            return decodeErrors(messageList as object[]);
+            return this.decodeErrors(messageList as object[]);
         }
 
         /// <summary>
@@ -202,9 +202,9 @@ namespace TestLinkApi
         /// </summary>
         private void stateIsValid()
         {
-            if (devkey == null)
+            if (this.devkey == null)
                 throw new TestLinkException("Devkey is null. You must supply a development key");
-            if (devkey == string.Empty)
+            if (this.devkey == string.Empty)
                 throw new TestLinkException("Devkey is empty. You must supply a development key");
         }
 
@@ -219,9 +219,9 @@ namespace TestLinkApi
         /// <returns>a list (may be empty)</returns>
         public List<Build> GetBuildsForTestPlan(int testplanid)
         {
-            stateIsValid();
-            var response = proxy.getBuildsForTestPlan(devkey, testplanid);
-            handleErrorMessage(response);
+            this.stateIsValid();
+            var response = this.proxy.getBuildsForTestPlan(this.devkey, testplanid);
+            this.handleErrorMessage(response);
             var retval = new List<Build>();
             if (response is string && (string) response == string.Empty) // equals null return
                 return retval;
@@ -245,9 +245,9 @@ namespace TestLinkApi
         /// <returns>General Result object</returns>
         public GeneralResult CreateBuild(int testplanid, string buildname, string buildnotes)
         {
-            stateIsValid();
-            var o = proxy.createBuild(devkey, testplanid, buildname, buildnotes);
-            handleErrorMessage(o);
+            this.stateIsValid();
+            var o = this.proxy.createBuild(this.devkey, testplanid, buildname, buildnotes);
+            this.handleErrorMessage(o);
             foreach (XmlRpcStruct data in o)
                 return TestLinkData.ToGeneralResult(data);
             return null;
@@ -260,12 +260,12 @@ namespace TestLinkApi
         /// <returns>a build object</returns>
         public Build GetLatestBuildForTestPlan(int tplanid)
         {
-            stateIsValid();
-            var response = proxy.getLatestBuildForTestPlan(devkey, tplanid);
+            this.stateIsValid();
+            var response = this.proxy.getLatestBuildForTestPlan(this.devkey, tplanid);
 
             var objectList = response as object[];
             var data = response as XmlRpcStruct;
-            if (handleErrorMessage(objectList, 3031))
+            if (this.handleErrorMessage(objectList, 3031))
                 return null; // no build existing    
 
             if (data != null)
@@ -315,23 +315,23 @@ namespace TestLinkApi
         /// <returns></returns>
         public GeneralResult ReportTCResult(int testcaseid, int testplanid, string status, int platformId = 0, string platformName = null, bool overwrite = false, bool guess = true, string notes = "", int buildid = 0, int bugid = 0)
         {
-            stateIsValid();
+            this.stateIsValid();
             object response = null;
             if (platformName != null)
             {
                 if (bugid == 0)
                 {
                     if (buildid == 0)
-                        response = proxy.reportTCResult(devkey, testcaseid, testplanid, status, platformName, overwrite, notes, guess);
+                        response = this.proxy.reportTCResult(this.devkey, testcaseid, testplanid, status, platformName, overwrite, notes, guess);
                     else
-                        response = proxy.reportTCResult(devkey, testcaseid, testplanid, status, platformName, overwrite, notes, guess, 0, buildid);
+                        response = this.proxy.reportTCResult(this.devkey, testcaseid, testplanid, status, platformName, overwrite, notes, guess, 0, buildid);
                 }
                 else
                 {
                     if (buildid == 0)
-                        response = proxy.reportTCResult(devkey, testcaseid, testplanid, status, platformName, overwrite, notes, guess, bugid);
+                        response = this.proxy.reportTCResult(this.devkey, testcaseid, testplanid, status, platformName, overwrite, notes, guess, bugid);
                     else
-                        response = proxy.reportTCResult(devkey, testcaseid, testplanid, status, platformName, overwrite, notes, guess, bugid, buildid);
+                        response = this.proxy.reportTCResult(this.devkey, testcaseid, testplanid, status, platformName, overwrite, notes, guess, bugid, buildid);
                 }
             }
             else
@@ -341,24 +341,24 @@ namespace TestLinkApi
                 if (bugid == 0)
                 {
                     if (buildid == 0)
-                        response = proxy.reportTCResult(devkey, testcaseid, testplanid, status, platformId, overwrite, notes, guess);
+                        response = this.proxy.reportTCResult(this.devkey, testcaseid, testplanid, status, platformId, overwrite, notes, guess);
                     else
-                        response = proxy.reportTCResult(devkey, testcaseid, testplanid, status, platformId, overwrite, notes, guess, 0, buildid);
+                        response = this.proxy.reportTCResult(this.devkey, testcaseid, testplanid, status, platformId, overwrite, notes, guess, 0, buildid);
                 }
                 else
                 {
                     if (buildid == 0)
-                        response = proxy.reportTCResult(devkey, testcaseid, testplanid, status, platformId, overwrite, notes, guess, bugid);
+                        response = this.proxy.reportTCResult(this.devkey, testcaseid, testplanid, status, platformId, overwrite, notes, guess, bugid);
                     else
-                        response = proxy.reportTCResult(devkey, testcaseid, testplanid, status, platformId, overwrite, notes, guess, bugid, buildid);
+                        response = this.proxy.reportTCResult(this.devkey, testcaseid, testplanid, status, platformId, overwrite, notes, guess, bugid, buildid);
                 }
             }
 
-            handleErrorMessage(response);
+            this.handleErrorMessage(response);
 
             //object response = proxy.reportTCResult(devkey, testcaseid, testplanid, statusChar, platformId, overwrite, notes, guess, buildid, bugid);
             //handleErrorMessage(response);
-            return handleReportTCResult(response);
+            return this.handleReportTCResult(response);
         }
 
         /// <summary>
@@ -374,7 +374,7 @@ namespace TestLinkApi
         /// <returns>An AttachmentRequestResponse</returns>
         public AttachmentRequestResponse UploadExecutionAttachment(int executionId, string filename, string fileType, byte[] content, string title = "", string description = "")
         {
-            stateIsValid();
+            this.stateIsValid();
             string base64String;
             try
             {
@@ -389,8 +389,8 @@ namespace TestLinkApi
                 base64String = "";
             }
 
-            var response = proxy.uploadExecutionAttachment(devkey, executionId, filename, fileType, base64String, title, description);
-            handleErrorMessage(response);
+            var response = this.proxy.uploadExecutionAttachment(this.devkey, executionId, filename, fileType, base64String, title, description);
+            this.handleErrorMessage(response);
             var r = TestLinkData.ToAttachmentRequestResponse(response as XmlRpcStruct);
             return r;
         }
@@ -404,14 +404,14 @@ namespace TestLinkApi
         /// <returns>a ExecutionResult or null</returns>
         public ExecutionResult GetLastExecutionResult(int testplanid, int testcaseid)
         {
-            stateIsValid();
-            var response = proxy.getLastExecutionResult(devkey, testplanid, testcaseid);
+            this.stateIsValid();
+            var response = this.proxy.getLastExecutionResult(this.devkey, testplanid, testcaseid);
 
             var result = new List<ExecutionResult>();
             if (response.Length == 0 || response[0] is int) // that signifies no execution results
                 return null;
 
-            handleErrorMessage(response);
+            this.handleErrorMessage(response);
             if (response != null)
                 foreach (XmlRpcStruct data in response)
                 {
@@ -434,9 +434,9 @@ namespace TestLinkApi
         /// <returns>a GeneralResult</returns>
         public GeneralResult DeleteExecution(int executionid)
         {
-            stateIsValid();
-            var o = proxy.deleteExecution(devkey, executionid);
-            handleErrorMessage(o);
+            this.stateIsValid();
+            var o = this.proxy.deleteExecution(this.devkey, executionid);
+            this.handleErrorMessage(o);
             var list = o as object[];
             return TestLinkData.ToGeneralResult(list[0] as XmlRpcStruct);
         }
@@ -453,13 +453,13 @@ namespace TestLinkApi
         /// <returns></returns>
         public TestCase GetTestCase(int testcaseid, int versionId = 0)
         {
-            stateIsValid();
+            this.stateIsValid();
             object o = null;
             if (versionId == 0)
-                o = proxy.getTestCase(devkey, testcaseid);
+                o = this.proxy.getTestCase(this.devkey, testcaseid);
             else
-                o = proxy.getTestCase(devkey, testcaseid, versionId);
-            handleErrorMessage(o);
+                o = this.proxy.getTestCase(this.devkey, testcaseid, versionId);
+            this.handleErrorMessage(o);
             var c = o as object[];
             var rList = c[0] as XmlRpcStruct;
             return TestLinkData.ToTestCase(rList);
@@ -467,15 +467,15 @@ namespace TestLinkApi
 
         public int? GetTestCaseIDByExternalId(int externalId, int projectId)
         {
-            stateIsValid();
+            this.stateIsValid();
             try
             {
-                var response = proxy.getTestCaseByExternalId(devkey, externalId, projectId);
-                var errs = decodeErrors(response);
+                var response = this.proxy.getTestCaseByExternalId(this.devkey, externalId, projectId);
+                var errs = this.decodeErrors(response);
                 if (errs.Count > 0 && errs[0].code == 5030) // 5030 is no id found
                     return null;
 
-                handleErrorMessage(response);
+                this.handleErrorMessage(response);
                 return int.Parse(response.ToString());
             }
             catch
@@ -487,17 +487,17 @@ namespace TestLinkApi
 
         public bool UpdateTestCase(TestCase pTestCase)
         {
-            stateIsValid();
+            this.stateIsValid();
             try
             {
-                var response = proxy.updateTestCase(devkey, pTestCase.externalid, pTestCase.name, pTestCase.summary, pTestCase.importance.ToString(),  pTestCase.status.ToString());
-                var errs = decodeErrors(response);
+                var response = this.proxy.updateTestCase(this.devkey, pTestCase.externalid, pTestCase.name, pTestCase.summary, pTestCase.importance.ToString(),  pTestCase.status.ToString());
+                var errs = this.decodeErrors(response);
                 if (errs.Count > 0 && errs[0].code == 5030) // 5030 is no id found
                 {
                     return false;
                 }
 
-                handleErrorMessage(response);
+                this.handleErrorMessage(response);
                 return true;
             }
             catch
@@ -509,7 +509,7 @@ namespace TestLinkApi
 
         public string GetCustomFileds(int testcaseid, string testcaseexternalid, int version, int testprojectid, string customfieldname, string details = "FULL")
         {
-            var result = proxy.getTestCaseCustomFieldDesignValue(devkey, testcaseid, testcaseexternalid, version, testprojectid, customfieldname, details);
+            var result = this.proxy.getTestCaseCustomFieldDesignValue(this.devkey, testcaseid, testcaseexternalid, version, testprojectid, customfieldname, details);
             return result as string;
         }
 
@@ -522,12 +522,12 @@ namespace TestLinkApi
         /// <returns>A list of Test Cases</returns>
         public List<TestCaseFromTestSuite> GetTestCasesForTestSuite(int testSuiteid, bool deep)
         {
-            stateIsValid();
+            this.stateIsValid();
             var result = new List<TestCaseFromTestSuite>();
-            var response = proxy.getTestCasesForTestSuite(devkey, testSuiteid, deep, "full");
+            var response = this.proxy.getTestCasesForTestSuite(this.devkey, testSuiteid, deep, "full");
             if (response is string && (string) response == string.Empty) // equals null return
                 return result;
-            handleErrorMessage(response);
+            this.handleErrorMessage(response);
             var list = response as object[];
             if (list != null)
                 foreach (XmlRpcStruct data in list)
@@ -547,11 +547,11 @@ namespace TestLinkApi
         /// <returns></returns>
         public List<int> GetTestCaseIdsForTestSuite(int testSuiteid, bool deep)
         {
-            stateIsValid();
-            var o = proxy.getTestCasesForTestSuite(devkey, testSuiteid, deep, "simple");
+            this.stateIsValid();
+            var o = this.proxy.getTestCasesForTestSuite(this.devkey, testSuiteid, deep, "simple");
             var result = new List<int>();
 
-            handleErrorMessage(o);
+            this.handleErrorMessage(o);
 
             if (o is object[] list)
                 foreach (var item in list)
@@ -574,14 +574,14 @@ namespace TestLinkApi
         /// <returns>a list of test cases found</returns>
         public List<TestCaseId> GetTestCaseIDByName(string testcasename, string testsuitename)
         {
-            stateIsValid();
-            var response = proxy.getTestCaseIDByName(devkey, testcasename, testsuitename);
-            var errs = decodeErrors(response);
+            this.stateIsValid();
+            var response = this.proxy.getTestCaseIDByName(this.devkey, testcasename, testsuitename);
+            var errs = this.decodeErrors(response);
             if (errs.Count > 0 && errs[0].code == 5030) // 5030 is no id found
                 return new List<TestCaseId>();
 
-            handleErrorMessage(response);
-            return processTestCaseId(response);
+            this.handleErrorMessage(response);
+            return this.processTestCaseId(response);
         }
 
         /// <summary>
@@ -592,7 +592,7 @@ namespace TestLinkApi
         /// <returns>a list containing zero to many test cases with that name that occur in the specific test suite</returns>
         public List<TestCaseId> GetTestCaseIDByName(string testcasename, int testSuiteId)
         {
-            var idList = GetTestCaseIDByName(testcasename);
+            var idList = this.GetTestCaseIDByName(testcasename);
             if (idList.Count == 0)
                 return idList;
             var result = new List<TestCaseId>();
@@ -609,14 +609,14 @@ namespace TestLinkApi
         /// <returns>a list containing zero to many test case id objects with that name</returns>
         public List<TestCaseId> GetTestCaseIDByName(string testcasename)
         {
-            stateIsValid();
-            var response = proxy.getTestCaseIDByName(devkey, testcasename);
-            var errs = decodeErrors(response);
+            this.stateIsValid();
+            var response = this.proxy.getTestCaseIDByName(this.devkey, testcasename);
+            var errs = this.decodeErrors(response);
             if (errs.Count > 0 && errs[0].code == 5030) // 5030 is no id found
                 return new List<TestCaseId>();
 
-            handleErrorMessage(response);
-            return processTestCaseId(response);
+            this.handleErrorMessage(response);
+            return this.processTestCaseId(response);
         }
 
         private List<TestCaseId> processTestCaseId(object response)
@@ -657,7 +657,7 @@ namespace TestLinkApi
             int order, bool checkduplicatedname, ActionOnDuplicatedName actiononduplicatedname,
             int executiontype, int importance)
         {
-            return CreateTestCase(authorLogin, testsuiteid, testcasename, testprojectid,
+            return this.CreateTestCase(authorLogin, testsuiteid, testcasename, testprojectid,
                 summary, new TestStep[0], keywords,
                 order, checkduplicatedname, actiononduplicatedname,
                 executiontype, importance);
@@ -699,14 +699,14 @@ namespace TestLinkApi
             }
 
 
-            stateIsValid();
-            var response = proxy.createTestCase(
-                devkey, authorLogin, testsuiteid, testcasename, testprojectid,
+            this.stateIsValid();
+            var response = this.proxy.createTestCase(
+                this.devkey, authorLogin, testsuiteid, testcasename, testprojectid,
                 summary, steps, keywords,
                 order, checkduplicatedname ? 1 : 0, actionFlag,
                 executiontype, importance);
 
-            handleErrorMessage(response);
+            this.handleErrorMessage(response);
 
             if (response is object[])
             {
@@ -733,13 +733,13 @@ namespace TestLinkApi
         public int addTestCaseToTestPlan(int testprojectid, int testplanid, string testcaseexternalid, int version, int platformid = 0)
         {
             object o = null;
-            stateIsValid();
+            this.stateIsValid();
             if (platformid == 0)
-                o = proxy.addTestCaseToTestPlan(devkey, testprojectid, testplanid, testcaseexternalid, version);
+                o = this.proxy.addTestCaseToTestPlan(this.devkey, testprojectid, testplanid, testcaseexternalid, version);
             else
-                o = proxy.addTestCaseToTestPlan(devkey, testprojectid, testplanid, testcaseexternalid, version, platformid);
+                o = this.proxy.addTestCaseToTestPlan(this.devkey, testprojectid, testplanid, testcaseexternalid, version, platformid);
 
-            handleErrorMessage(o);
+            this.handleErrorMessage(o);
             if (o is XmlRpcStruct)
             {
                 var data = o as XmlRpcStruct;
@@ -782,9 +782,9 @@ namespace TestLinkApi
                 base64String = "";
             }
 
-            stateIsValid();
-            var response = proxy.uploadTestCaseAttachment(devkey, testcaseid, filename, fileType, base64String, title, description);
-            handleErrorMessage(response);
+            this.stateIsValid();
+            var response = this.proxy.uploadTestCaseAttachment(this.devkey, testcaseid, filename, fileType, base64String, title, description);
+            this.handleErrorMessage(response);
             var r = TestLinkData.ToAttachmentRequestResponse(response as XmlRpcStruct);
             return r;
         }
@@ -796,9 +796,9 @@ namespace TestLinkApi
         /// <returns></returns>
         public List<Attachment> GetTestCaseAttachments(int testCaseId)
         {
-            stateIsValid();
-            var o = proxy.getTestCaseAttachments(devkey, testCaseId);
-            handleErrorMessage(o);
+            this.stateIsValid();
+            var o = this.proxy.getTestCaseAttachments(this.devkey, testCaseId);
+            this.handleErrorMessage(o);
             var result = new List<Attachment>();
             var olist = o as XmlRpcStruct;
             if (olist != null)
@@ -828,12 +828,12 @@ namespace TestLinkApi
         /// <returns></returns>
         public List<TestCaseFromTestPlan> GetTestCasesForTestPlan(int testplanid, int testcaseid, int buildid, int keywordid, bool executed, int assignedTo, string executedstatus)
         {
-            stateIsValid();
-            var response = proxy.getTestCasesForTestPlan(devkey, testplanid, testcaseid, buildid, keywordid, executed, assignedTo, executedstatus);
+            this.stateIsValid();
+            var response = this.proxy.getTestCasesForTestPlan(this.devkey, testplanid, testcaseid, buildid, keywordid, executed, assignedTo, executedstatus);
             var result = new List<TestCaseFromTestPlan>();
             if (response is string && (string) response == string.Empty) // equals null return
                 return result;
-            handleErrorMessage(response);
+            this.handleErrorMessage(response);
             var list = response as XmlRpcStruct;
             return TestLinkData.GenerateFromResponse(list);
         }
@@ -851,12 +851,12 @@ namespace TestLinkApi
         /// <returns></returns>
         public List<TestCaseFromTestPlan> GetTestCasesForTestPlan(int testplanid, int testcaseid, int buildid, int keywordid, bool executed, int assignedTo)
         {
-            stateIsValid();
-            var response = proxy.getTestCasesForTestPlan(devkey, testplanid, testcaseid, buildid, keywordid, executed, assignedTo);
+            this.stateIsValid();
+            var response = this.proxy.getTestCasesForTestPlan(this.devkey, testplanid, testcaseid, buildid, keywordid, executed, assignedTo);
             var result = new List<TestCaseFromTestPlan>();
             if (response is string && (string) response == string.Empty) // equals null return
                 return result;
-            handleErrorMessage(response);
+            this.handleErrorMessage(response);
             var list = response as XmlRpcStruct;
             return TestLinkData.GenerateFromResponse(list);
         }
@@ -873,12 +873,12 @@ namespace TestLinkApi
         /// <returns></returns>
         public List<TestCaseFromTestPlan> GetTestCasesForTestPlan(int testplanid, int testcaseid, int buildid, int keywordid, bool executed)
         {
-            stateIsValid();
-            var response = proxy.getTestCasesForTestPlan(devkey, testplanid, testcaseid, buildid, keywordid, executed);
+            this.stateIsValid();
+            var response = this.proxy.getTestCasesForTestPlan(this.devkey, testplanid, testcaseid, buildid, keywordid, executed);
             var result = new List<TestCaseFromTestPlan>();
             if (response is string && (string) response == string.Empty) // equals null return
                 return result;
-            handleErrorMessage(response);
+            this.handleErrorMessage(response);
             var list = response as XmlRpcStruct;
             return TestLinkData.GenerateFromResponse(list);
         }
@@ -894,12 +894,12 @@ namespace TestLinkApi
         /// <returns></returns>
         public List<TestCaseFromTestPlan> GetTestCasesForTestPlan(int testplanid, int testcaseid, int buildid, int keywordid)
         {
-            stateIsValid();
-            var response = proxy.getTestCasesForTestPlan(devkey, testplanid, testcaseid, buildid, keywordid);
+            this.stateIsValid();
+            var response = this.proxy.getTestCasesForTestPlan(this.devkey, testplanid, testcaseid, buildid, keywordid);
             var result = new List<TestCaseFromTestPlan>();
             if (response is string && (string) response == string.Empty) // equals null return
                 return result;
-            handleErrorMessage(response);
+            this.handleErrorMessage(response);
             var list = response as XmlRpcStruct;
             return TestLinkData.GenerateFromResponse(list);
         }
@@ -914,20 +914,20 @@ namespace TestLinkApi
         /// <returns></returns>
         public List<TestCaseFromTestPlan> GetTestCasesForTestPlan(int testplanid, int testcaseid, int buildid)
         {
-            stateIsValid();
-            var response = proxy.getTestCasesForTestPlan(devkey, testplanid, testcaseid, buildid);
+            this.stateIsValid();
+            var response = this.proxy.getTestCasesForTestPlan(this.devkey, testplanid, testcaseid, buildid);
             var result = new List<TestCaseFromTestPlan>();
             if (response is string && (string) response == string.Empty) // equals null return
                 return result;
-            handleErrorMessage(response);
+            this.handleErrorMessage(response);
             var list = response as XmlRpcStruct;
             return TestLinkData.GenerateFromResponse(list);
         }
 
         public string GetTestCaseAssignedTester(int testplanid, int testcaseid, int platformid, int buildId)
         {
-            stateIsValid();
-            var response = proxy.getTestCaseAssignedTester(devkey, testplanid, testcaseid, platformid, buildId);
+            this.stateIsValid();
+            var response = this.proxy.getTestCaseAssignedTester(this.devkey, testplanid, testcaseid, platformid, buildId);
             if (!((response as object[])?[0] is XmlRpcStruct list)) return string.Empty;
             foreach (DictionaryEntry dictionaryEntry in list)
             {
@@ -947,12 +947,12 @@ namespace TestLinkApi
         /// <returns></returns>
         public List<TestCaseFromTestPlan> GetTestCasesForTestPlan(int testplanid, int testcaseid)
         {
-            stateIsValid();
-            var response = proxy.getTestCasesForTestPlan(devkey, testplanid, testcaseid);
+            this.stateIsValid();
+            var response = this.proxy.getTestCasesForTestPlan(this.devkey, testplanid, testcaseid);
             var result = new List<TestCaseFromTestPlan>();
             if (response is string && (string) response == string.Empty) // equals null return
                 return result;
-            handleErrorMessage(response);
+            this.handleErrorMessage(response);
             var list = response as XmlRpcStruct;
             return TestLinkData.GenerateFromResponse(list);
         }
@@ -964,13 +964,13 @@ namespace TestLinkApi
         /// <returns>List of test cases with test plan data added</returns>
         public List<TestCaseFromTestPlan> GetTestCasesForTestPlan(int testplanid)
         {
-            stateIsValid();
-            var response = proxy.getTestCasesForTestPlan(devkey, testplanid);
+            this.stateIsValid();
+            var response = this.proxy.getTestCasesForTestPlan(this.devkey, testplanid);
 
             if (response is string && (string) response == string.Empty) // equals null return
                 return new List<TestCaseFromTestPlan>();
 
-            handleErrorMessage(response);
+            this.handleErrorMessage(response);
             var list = response as XmlRpcStruct;
             return TestLinkData.GenerateFromResponse(list);
         }
@@ -990,11 +990,11 @@ namespace TestLinkApi
         {
             var retval = new List<TestPlan>();
             object response = null;
-            stateIsValid();
+            this.stateIsValid();
             // Checked Testlink V 1.9.2 Still behaves this way
             try
             {
-                response = proxy.getProjectTestPlans(devkey, projectid);
+                response = this.proxy.getProjectTestPlans(this.devkey, projectid);
             }
             catch (XmlRpcTypeMismatchException) // if a project has no test plans this exception is thrown
             {
@@ -1005,7 +1005,7 @@ namespace TestLinkApi
                 return retval; // empty list
             }
 
-            handleErrorMessage(response);
+            this.handleErrorMessage(response);
             if (response is string && (string) response == string.Empty) // equals null return
                 return retval;
             var results = response as XmlRpcStruct[];
@@ -1030,9 +1030,9 @@ namespace TestLinkApi
         /// <returns>a TestPlan or Null</returns>
         public TestPlan getTestPlanByName(string projectname, string planName)
         {
-            stateIsValid();
-            object response = proxy.getTestPlanByName(devkey, projectname, planName);
-            handleErrorMessage(response);
+            this.stateIsValid();
+            object response = this.proxy.getTestPlanByName(this.devkey, projectname, planName);
+            this.handleErrorMessage(response);
             var oList = response as object[];
             if (oList.Length == 1)
             {
@@ -1055,9 +1055,9 @@ namespace TestLinkApi
         /// <returns></returns>
         public List<TestPlanTotal> GetTotalsForTestPlan(int testplanid)
         {
-            stateIsValid();
-            var o = proxy.getTotalsForTestPlan(devkey, testplanid);
-            handleErrorMessage(o);
+            this.stateIsValid();
+            var o = this.proxy.getTotalsForTestPlan(this.devkey, testplanid);
+            this.handleErrorMessage(o);
             var list = new List<TestPlanTotal>();
 
             XmlRpcStruct[] resultList;
@@ -1087,10 +1087,10 @@ namespace TestLinkApi
         {
             var result = new List<TestPlatform>();
 
-            stateIsValid();
-            var o = proxy.getTestPlanPlatforms(devkey, testplanid);
+            this.stateIsValid();
+            var o = this.proxy.getTestPlanPlatforms(this.devkey, testplanid);
 
-            if (handleErrorMessage(o, 3041)) // 3041 means no platforms are assigned for this testplan
+            if (this.handleErrorMessage(o, 3041)) // 3041 means no platforms are assigned for this testplan
                 return result; // return an empty list 
             if (o is object[])
             {
@@ -1115,9 +1115,9 @@ namespace TestLinkApi
         /// <returns></returns>
         public GeneralResult CreateTestPlan(string testplanname, string testProjectName, string notes = "", bool active = true)
         {
-            stateIsValid();
-            var o = proxy.createTestPlan(devkey, testplanname, testProjectName, notes, active ? "1" : "0");
-            handleErrorMessage(o);
+            this.stateIsValid();
+            var o = this.proxy.createTestPlan(this.devkey, testplanname, testProjectName, notes, active ? "1" : "0");
+            this.handleErrorMessage(o);
             foreach (XmlRpcStruct data in o)
                 return TestLinkData.ToGeneralResult(data);
             return null;
@@ -1133,15 +1133,15 @@ namespace TestLinkApi
         /// <returns></returns>
         public List<TestProject> GetProjects()
         {
-            stateIsValid();
+            this.stateIsValid();
             object response = null;
-            response = proxy.getProjects(devkey);
+            response = this.proxy.getProjects(this.devkey);
 
             var retval = new List<TestProject>();
             if (response is string && (string) response == string.Empty) // equals null return
                 return retval;
             var list = response as object[];
-            handleErrorMessage(list);
+            this.handleErrorMessage(list);
             foreach (XmlRpcStruct entry in list)
             {
                 var tp = TestLinkData.ToTestProject(entry);
@@ -1159,9 +1159,9 @@ namespace TestLinkApi
         public TestProject GetProject(string projectname)
         {
             TestProject result = null;
-            stateIsValid();
-            var o = proxy.getTestProjectByName(devkey, projectname);
-            handleErrorMessage(o);
+            this.stateIsValid();
+            var o = this.proxy.getTestProjectByName(this.devkey, projectname);
+            this.handleErrorMessage(o);
             if (o is object[])
             {
                 var olist = o as object[];
@@ -1201,9 +1201,9 @@ namespace TestLinkApi
                 base64String = "";
             }
 
-            stateIsValid();
-            var response = proxy.uploadTestProjectAttachment(devkey, executionId, filename, fileType, base64String, title, description);
-            handleErrorMessage(response);
+            this.stateIsValid();
+            var response = this.proxy.uploadTestProjectAttachment(this.devkey, executionId, filename, fileType, base64String, title, description);
+            this.handleErrorMessage(response);
             var r = TestLinkData.ToAttachmentRequestResponse(response as XmlRpcStruct);
             return r;
         }
@@ -1218,9 +1218,9 @@ namespace TestLinkApi
         public GeneralResult CreateProject(string projectname, string testcasePrefix, string notes = "")
         {
             GeneralResult result = null;
-            stateIsValid();
-            var o = proxy.createTestProject(devkey, projectname, testcasePrefix, notes);
-            handleErrorMessage(o);
+            this.stateIsValid();
+            var o = this.proxy.createTestProject(this.devkey, projectname, testcasePrefix, notes);
+            this.handleErrorMessage(o);
             var olist = o as object[];
             if (olist != null) result = TestLinkData.ToGeneralResult(olist[0] as XmlRpcStruct);
 
@@ -1240,10 +1240,10 @@ namespace TestLinkApi
         {
             var result = new List<TestSuite>();
             // empty string means none, otherwise it is name, id combo
-            stateIsValid();
-            var o = proxy.getTestSuitesForTestPlan(devkey, testplanid);
+            this.stateIsValid();
+            var o = this.proxy.getTestSuitesForTestPlan(this.devkey, testplanid);
 
-            handleErrorMessage(o);
+            this.handleErrorMessage(o);
 
             if (o is string)
                 return result;
@@ -1263,14 +1263,14 @@ namespace TestLinkApi
         /// <returns></returns>
         public List<TestSuite> GetFirstLevelTestSuitesForTestProject(int testprojectid)
         {
-            stateIsValid();
-            var response = proxy.getFirstLevelTestSuitesForTestProject(devkey, testprojectid);
-            var errors = decodeErrors(response);
+            this.stateIsValid();
+            var response = this.proxy.getFirstLevelTestSuitesForTestProject(this.devkey, testprojectid);
+            var errors = this.decodeErrors(response);
             var result = new List<TestSuite>();
             if (errors.Count > 0)
             {
                 if (errors[0].code != 7008) // project has no test suites, we return an emptu result
-                    handleErrorMessage(response);
+                    this.handleErrorMessage(response);
             }
             else
             {
@@ -1284,14 +1284,14 @@ namespace TestLinkApi
         public List<TestSuite> GetTestSuitesForTestSuite(int testsuiteid)
         {
             var Result = new List<TestSuite>();
-            stateIsValid();
-            var o = proxy.getTestSuitesForTestSuite(devkey, testsuiteid);
+            this.stateIsValid();
+            var o = this.proxy.getTestSuitesForTestSuite(this.devkey, testsuiteid);
             // Testlink returns an empty string if a test suite has no child test suites
             if (o is string)
                 return Result;
 
             // just in case this gets fixed, then this should work.
-            if (handleErrorMessage(o, 7008))
+            if (this.handleErrorMessage(o, 7008))
                 return Result; // empty list
             var response = o as XmlRpcStruct;
             foreach (var data in response.Values)
@@ -1308,9 +1308,9 @@ namespace TestLinkApi
         /// <returns></returns>
         public TestSuite GetTestSuiteById(int id)
         {
-            stateIsValid();
-            var o = proxy.getTestSuiteByID(devkey, id);
-            if (handleErrorMessage(o, 8000))
+            this.stateIsValid();
+            var o = this.proxy.getTestSuiteByID(this.devkey, id);
+            if (this.handleErrorMessage(o, 8000))
                 return null;
             var ts = TestLinkData.ToTestSuite(o as XmlRpcStruct);
             return ts;
@@ -1329,12 +1329,12 @@ namespace TestLinkApi
         public GeneralResult CreateTestSuite(int testprojectid, string testsuitename, string details, int parentId = 0, int order = 0, bool checkduplicatedname = true)
         {
             object[] o = null;
-            stateIsValid();
+            this.stateIsValid();
             if (parentId == 0)
-                o = proxy.createTestSuite(devkey, testprojectid, testsuitename, details, order, checkduplicatedname);
+                o = this.proxy.createTestSuite(this.devkey, testprojectid, testsuitename, details, order, checkduplicatedname);
             else
-                o = proxy.createTestSuite(devkey, testprojectid, testsuitename, details, parentId, order, checkduplicatedname);
-            handleErrorMessage(o);
+                o = this.proxy.createTestSuite(this.devkey, testprojectid, testsuitename, details, parentId, order, checkduplicatedname);
+            this.handleErrorMessage(o);
             foreach (XmlRpcStruct data in o)
                 return TestLinkData.ToGeneralResult(data);
             return null;
@@ -1366,9 +1366,9 @@ namespace TestLinkApi
                 base64String = "";
             }
 
-            stateIsValid();
-            var response = proxy.uploadTestSuiteAttachment(devkey, testsuiteid, filename, fileType, base64String, title, description);
-            handleErrorMessage(response);
+            this.stateIsValid();
+            var response = this.proxy.uploadTestSuiteAttachment(this.devkey, testsuiteid, filename, fileType, base64String, title, description);
+            this.handleErrorMessage(response);
             var r = TestLinkData.ToAttachmentRequestResponse(response as XmlRpcStruct);
             return r;
         }
@@ -1383,7 +1383,7 @@ namespace TestLinkApi
         /// <returns></returns>
         public string SayHello()
         {
-            var hello = proxy.sayHello();
+            var hello = this.proxy.sayHello();
             return hello;
         }
 
@@ -1393,7 +1393,7 @@ namespace TestLinkApi
         /// <returns></returns>
         public string about()
         {
-            var result = proxy.about();
+            var result = this.proxy.about();
             return result;
         }
 
@@ -1404,9 +1404,9 @@ namespace TestLinkApi
         /// <returns>true if key exists</returns>
         public bool checkDevKey(string devkey)
         {
-            stateIsValid();
-            var o = proxy.checkDevKey(devkey);
-            handleErrorMessage(o);
+            this.stateIsValid();
+            var o = this.proxy.checkDevKey(devkey);
+            this.handleErrorMessage(o);
 
             return (bool) o;
         }
@@ -1418,9 +1418,9 @@ namespace TestLinkApi
         /// <returns></returns>
         public bool DoesUserExist(string username)
         {
-            stateIsValid();
-            var o = proxy.doesUserExist(devkey, username);
-            if (handleErrorMessage(o, 10000)) //10000 means no such user login
+            this.stateIsValid();
+            var o = this.proxy.doesUserExist(this.devkey, username);
+            if (this.handleErrorMessage(o, 10000)) //10000 means no such user login
                 return false;
 
             return (bool) o;

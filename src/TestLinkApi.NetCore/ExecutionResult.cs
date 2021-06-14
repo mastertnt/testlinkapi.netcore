@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TestLinkApi
+namespace XTestlinkApi
 {
     /// <summary>
     ///  Represent the recorded outcome of a test case execution.

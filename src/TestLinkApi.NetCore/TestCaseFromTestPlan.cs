@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TestLinkApi
+namespace XTestlinkApi
 {
     /// <summary>
     ///  test cases as they are returned from a test plan

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Title>TestLink .NET Core</Title>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>TestLinkApi</RootNamespace>
+    <RootNamespace>XTestlinkApi</RootNamespace>
     <Authors>mastertnt</Authors>
     <Company></Company>
     <Description>Testlink Api for .NET Core
@@ -22,6 +22,7 @@ Forked from : https://github.com/freemanke/testlinkapi.netcore</Description>
     <AssemblyVersion>1.3.0.0</AssemblyVersion>
     <FileVersion>1.3.0.0</FileVersion>
     <PackageId>XTestlinkApi</PackageId>
+    <AssemblyName>XTestlinkApi</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

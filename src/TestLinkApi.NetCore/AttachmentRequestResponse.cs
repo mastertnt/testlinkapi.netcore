@@ -1,4 +1,4 @@
-﻿namespace TestLinkApi
+﻿namespace XTestlinkApi
 {
     /// <summary>
     /// this is returned as a response to an attachment request

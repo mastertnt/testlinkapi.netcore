@@ -1,6 +1,6 @@
 ﻿using CookComputing.XmlRpc;
 
-namespace TestLinkApi
+namespace XTestlinkApi
 {
     /// <summary>
     /// the interface mapping required for the XmlRpc api of testlink. 

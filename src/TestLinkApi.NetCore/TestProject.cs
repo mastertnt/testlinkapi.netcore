@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace TestLinkApi
+namespace XTestlinkApi
 {
     /// <summary>
     /// represent a test project object in testlink

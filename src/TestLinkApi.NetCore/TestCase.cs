@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TestLinkApi
+namespace XTestlinkApi
 {
     /// <summary>
     /// test cases as they are returned from the getTestCase API call

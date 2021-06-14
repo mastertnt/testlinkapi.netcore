@@ -1,4 +1,4 @@
-﻿namespace TestLinkApi
+﻿namespace XTestlinkApi
 {
     /// <summary>
     ///  represent a folder in the test specification tree

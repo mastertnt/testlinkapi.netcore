@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TestLinkApi
+namespace XTestlinkApi
 {
     /// <summary>
     /// test case as it is retrieved from testsuite

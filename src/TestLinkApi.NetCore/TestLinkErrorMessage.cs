@@ -1,4 +1,4 @@
-﻿namespace TestLinkApi
+﻿namespace XTestlinkApi
 {
     /// <summary>
     /// package an the error message returned by the API

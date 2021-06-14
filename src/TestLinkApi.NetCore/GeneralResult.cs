@@ -1,4 +1,4 @@
-﻿namespace TestLinkApi
+﻿namespace XTestlinkApi
 {
     /// <summary>
     ///  returned when creating new TestProjects, TestCases, projects etc
@@ -46,8 +46,8 @@
         /// </summary>
         public GeneralResult()
         {
-            status = false;
-            message = "no response from server";
+            this.status = false;
+            this.message = "no response from server";
         }
     }
 }

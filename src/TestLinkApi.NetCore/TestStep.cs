@@ -1,4 +1,4 @@
-﻿namespace TestLinkApi
+﻿namespace XTestlinkApi
 {
     /// <summary>
     ///  represent a single test step in a test case
@@ -49,11 +49,11 @@
         /// <param name="executionType">1=manual, 2=automatic</param>
         public TestStep(int stepNr, string actions, string expectedResult, bool isActive, int executionType)
         {
-            step_number = stepNr;
+            this.step_number = stepNr;
             this.actions = actions;
-            expected_results = expectedResult;
-            active = isActive;
-            execution_type = executionType;
+            this.expected_results = expectedResult;
+            this.active = isActive;
+            this.execution_type = executionType;
         }
     }
 }

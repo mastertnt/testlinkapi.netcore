@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using CookComputing.XmlRpc;
 
-namespace TestLinkApi
+namespace XTestlinkApi
 {
     public abstract class TestLinkData
     {

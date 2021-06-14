@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TestLinkApi
+namespace XTestlinkApi
 {
     /// <summary>
     /// The object returned from Testlinkt when requesting an attachment

@@ -28,7 +28,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace TestLinkApi
+namespace XTestlinkApi
 {
     /// <summary>
     /// basic exception thrown whenever Testlink returns an error
@@ -68,9 +68,9 @@ namespace TestLinkApi
         public TestLinkException(List<TestLinkErrorMessage> errs)
             : base("TestLinkException: testlink returned error messages. See errors")
         {
-            errors = errs;
+            this.errors = errs;
             foreach (var error in errs)
-                Data.Add(error.code, error.message);
+                this.Data.Add(error.code, error.message);
         }
 
         /// <summary>
@@ -81,9 +81,9 @@ namespace TestLinkApi
         public TestLinkException(string msg, List<TestLinkErrorMessage> errs)
             : base(msg)
         {
-            errors = errs;
+            this.errors = errs;
             foreach (var error in errs)
-                Data.Add(error.code, error.message);
+                this.Data.Add(error.code, error.message);
         }
 
         /// <summary>
