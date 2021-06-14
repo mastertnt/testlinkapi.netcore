@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TestLinkApi.NetCore\TestLinkApi.NetCore.csproj" />
+    <ProjectReference Include="..\TestLinkApi.NetCore\XTestlinkApi.csproj" />
   </ItemGroup>
 
 </Project>

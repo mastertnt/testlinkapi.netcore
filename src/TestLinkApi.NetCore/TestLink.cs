@@ -478,10 +478,11 @@ namespace TestLinkApi
                 handleErrorMessage(response);
                 return int.Parse(response.ToString());
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
             }
+
+            return null;
         }
 
         public bool UpdateTestCase(TestCase pTestCase)
@@ -499,7 +500,7 @@ namespace TestLinkApi
                 handleErrorMessage(response);
                 return true;
             }
-            catch (Exception ex)
+            catch
             {
             }
 
